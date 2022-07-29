@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js from CDN-->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div element where d3 will append parent drawing elements -->
+<div id="my_dataviz"></div>
+
+<!-- Alternatively populate the below table using javascript -->
+<table id="myTable" class="table table-borderless table-striped">
+  <thead id="tableHeader">
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+// set the dimensions and margins of the drawing area (800 by 800 pixels)
+const margin = {top: 30, right: 10, bottom: 10, left: 0};
+const width = 800 - margin.left - margin.right;
+const height = 400 - margin.top - margin.bottom;
+
+// d3 setup stuff - creates additional elements on DOM
+// All drawn elements will become child elements of this
+const d3BaseElement = d3.select("#my_dataviz")
+.append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .attr("style", "background-color: beige")
+.append("g")
+  .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+
+
+//Use d3 to read in csv and populate an object
+d3.csv("test-data.csv", function(data) {
+
+  console.log(data); //notice how it parsed numbers in csv as strings - you will need to convert string to number for math
+
+  //put logic for calculations in one or more functions
+  calculateDatapoints(data);
+
+
+})
+
+//this function will interrogate csvObject and calculate desired datapoints
+function calculateDatapoints(csvObject){
+
+    //Find average of column 1 (loop through all rows)
+    let column1Sum = 0;
+    for(let i = 0; i < csvObject.length; i++){
+        //add to sum for each row
+        column1Sum += parseInt(csvObject[i].Column1);
+    }
+    //calculate average
+    const column1Avg = column1Sum / (csvObject.length - 1);
+
+    //Find average of row 3 (loop through columns by header)
+    let row3Sum = 0;
+    for(let i = 0; i < csvObject.columns.length; i++){
+        //add to sum for each column in row 3
+        row3Sum += parseInt(csvObject[2][csvObject.columns[i]]);
+    }
+    //calculate average
+    const row3Avg = row3Sum / csvObject.columns.length;
+
+    //pass datapoints into function that will generate visuals
+    createD3Visuals(column1Avg, row3Avg);
+    //alternative - probably easier for tables
+    populateStandardHTMLTable(csvObject);
+}
+
+//This function will use the d3BaseElement to append more visual elements
+function createD3Visuals(col1Avg, r3Avg){
+
+    //Header textbox for col1vg
+    d3BaseElement.append("rect")
+      .attr("x", 50)
+      .attr("y", 50)
+      .attr("width", 200)
+      .attr("height", 50)
+      .attr("fill", "blue");
+    d3BaseElement.append("text")
+      .attr("x", 70)
+      .attr("y", 70)
+      .attr("dy", ".35em")
+      .style('fill', 'white')
+      .text("Column 1 Avg");
+
+    //Value textbox (lower y position to be below) for col1vg
+    d3BaseElement.append("rect")
+      .attr("x", 50)
+      .attr("y", 100)
+      .attr("width", 200)
+      .attr("height", 50)
+      .attr("fill", "white");
+    d3BaseElement.append("text")
+      .attr("x", 70)
+      .attr("y", 120)
+      .attr("dy", ".35em")
+      .text(col1Avg);
+
+    //Header textbox for r3Avg
+    d3BaseElement.append("rect")
+      .attr("x", 250)
+      .attr("y", 50)
+      .attr("width", 200)
+      .attr("height", 50)
+      .attr("fill", "green");
+    d3BaseElement.append("text")
+      .attr("x", 270)
+      .attr("y", 70)
+      .attr("dy", ".35em")
+      .style('fill', 'white')
+      .text("Row 3 Avg");
+
+    //Value textbox (lower y position to be below) for r3Avg
+    d3BaseElement.append("rect")
+      .attr("x", 250)
+      .attr("y", 100)
+      .attr("width", 200)
+      .attr("height", 50)
+      .attr("fill", "white");
+    d3BaseElement.append("text")
+      .attr("x", 270)
+      .attr("y", 120)
+      .attr("dy", ".35em")
+      .text(r3Avg);
+}
+
+function populateStandardHTMLTable(csvObj){
+  //get refernence to table header
+  const tableHeader = document.getElementById("tableHeader");
+  //populate header row
+  let headerRow = tableHeader.insertRow();
+  csvObj.columns.forEach((element, i) => {
+    console.log(element);
+    let cell = headerRow.insertCell(i);
+    cell.innerHTML = element;
+  });
+  
+  //reference table body
+  const tableBody = document.getElementById("tableBody");
+  //populate table body rows
+  for (let i = 0; i < csvObj.length; i++){
+    let row = tableBody.insertRow();
+    csvObj.columns.forEach((element, index) => {
+      let cell = row.insertCell(index);
+      cell.innerHTML = csvObj[i][element];
+    });
+  }
+}
+
+</script>
