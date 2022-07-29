@@ -5,7 +5,8 @@ npm install -g lite-server
 
 **Above will install a minimal development web server to serve up your app for your web browser
 
-**command:
+**command
+
 lite-server
 
 **this should start a local webserver, serving the contents over localhost:3000
